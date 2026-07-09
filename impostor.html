@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Infiltrado — Impostor &amp; Undercover</title>
+<meta name="theme-color" content="#0B0E14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Infiltrado">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230B0E14'/%3E%3Ctext x='50' y='62' font-size='54' text-anchor='middle'%3E%F0%9F%95%B5%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230B0E14'/%3E%3Ctext x='50' y='62' font-size='54' text-anchor='middle'%3E%F0%9F%95%B5%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<style>
+/* ==========================================================================
+   TOKENS
+   ========================================================================== */
+:root{
+  --bg:#0B0E14;
+  --surface:#141A26;
+  --surface-2:#1C2333;
+  --surface-3:#252D40;
+  --border:rgba(255,255,255,.07);
+  --text:#F4F6FA;
+  --text-muted:#8992A8;
+  --text-faint:#5C6478;
+  --gold:#E8B84B;
+  --gold-soft:rgba(232,184,75,.14);
+  --teal:#45D6C4;
+  --teal-soft:rgba(69,214,196,.14);
+  --danger:#F0555F;
+  --danger-soft:rgba(240,85,95,.14);
+  --shadow-lg: 0 24px 60px rgba(0,0,0,.45);
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+  --ease: cubic-bezier(.22,.9,.32,1);
+}
+
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, #171E2C 0%, var(--bg) 55%);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  overflow:hidden;
+  position:fixed;
+  inset:0;
+  -webkit-user-select:none;
+  user-select:none;
+}
+
+/* App frame: mobile-first, caps width on larger screens without looking like a "website" */
+#app{
+  position:fixed;
+  inset:0;
+  max-width:520px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  height:100dvh;
+}
+
+/* ==========================================================================
+   SCREEN MANAGEMENT
+   ========================================================================== */
+.screen{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 22px) 22px calc(env(safe-area-inset-bottom) + 22px);
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(14px) scale(.99);
+  transition:opacity .38s var(--ease), transform .38s var(--ease);
+}
+.screen.active{
+  opacity:1;
+  pointer-events:auto;
+  transform:translateY(0) scale(1);
+}
+
+/* ==========================================================================
+   TYPOGRAPHY / SHARED
+   ========================================================================== */
+.eyebrow{
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--text-faint);
+  margin:0 0 6px;
+}
+h1.title{
+  font-size:30px;
+  font-weight:800;
+  letter-spacing:-.02em;
+  margin:0 0 4px;
+  line-height:1.1;
+}
+p.subtitle{
+  font-size:15px;
+  color:var(--text-muted);
+  margin:0 0 24px;
+  line-height:1.45;
+}
+.spacer{ flex:1 1 auto; }
+
+/* Buttons */
+.btn{
+  appearance:none;
+  border:none;
+  outline:none;
+  cursor:pointer;
+  font-family:inherit;
+  font-weight:700;
+  font-size:17px;
+  letter-spacing:-.01em;
+  border-radius:20px;
+  padding:18px 22px;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  transition:transform .15s var(--ease), filter .2s var(--ease), box-shadow .2s var(--ease);
+  -webkit-tap-highlight-color:transparent;
+}
+.btn:active{ transform:scale(.965); }
+.btn-primary{
+  background:linear-gradient(155deg,#F3CA6B,var(--gold) 60%,#D9A331);
+  color:#191204;
+  box-shadow:0 14px 30px -10px rgba(232,184,75,.55);
+}
+.btn-primary:active{ filter:brightness(.96); }
+.btn-secondary{
+  background:var(--surface-2);
+  color:var(--text);
+  border:1px solid var(--border);
+}
+.btn-ghost{
+  background:transparent;
+  color:var(--text-muted);
+  font-weight:600;
+}
+.btn-danger{
+  background:linear-gradient(155deg,#F97B83,var(--danger) 65%,#D63C46);
+  color:#2b0709;
+  box-shadow:0 14px 30px -10px rgba(240,85,95,.5);
+}
+.btn:disabled{ opacity:.35; pointer-events:none; }
+.btn-row{ display:flex; gap:12px; }
+
+/* Card container used across screens */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:20px;
+}
+
+/* ==========================================================================
+   SETUP SCREEN
+   ========================================================================== */
+#screen-setup{ padding:0; overflow:hidden; }
+.setup-scroll{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:calc(env(safe-area-inset-top) + 22px) 22px 24px;
+}
+.setup-footer{
+  flex-shrink:0;
+  padding:14px 22px calc(env(safe-area-inset-bottom) + 16px);
+  background:var(--bg);
+  border-top:1px solid var(--border);
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:26px;
+}
+.brand-mark{
+  width:46px;height:46px;border-radius:14px;
+  background:linear-gradient(155deg,#F3CA6B,var(--gold) 60%,#D9A331);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;
+  box-shadow:0 10px 22px -8px rgba(232,184,75,.6);
+}
+.brand-name{ font-size:19px; font-weight:800; letter-spacing:-.01em; }
+.brand-tag{ font-size:12.5px; color:var(--text-faint); margin-top:1px; }
+
+.section-label{
+  font-size:13px;
+  font-weight:700;
+  color:var(--text-muted);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin:26px 0 10px;
+}
+.section-label:first-of-type{ margin-top:4px; }
+
+/* Stepper (players / impostors) */
+.stepper{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  padding:14px 16px;
+}
+.stepper-info{ display:flex; flex-direction:column; }
+.stepper-title{ font-size:15.5px; font-weight:700; }
+.stepper-desc{ font-size:12.5px; color:var(--text-faint); margin-top:2px; }
+.stepper-controls{ display:flex; align-items:center; gap:14px; }
+.stepper-btn{
+  width:38px;height:38px;border-radius:12px;
+  background:var(--surface-3);
+  border:1px solid var(--border);
+  color:var(--text);
+  font-size:19px;
+  font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:transform .12s var(--ease), background .15s;
+}
+.stepper-btn:active{ transform:scale(.9); background:var(--gold-soft); }
+.stepper-value{
+  min-width:30px;
+  text-align:center;
+  font-size:20px;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+}
+.stepper + .stepper{ margin-top:10px; }
+
+/* Mode selector */
+.mode-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.mode-card{
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:var(--radius-md);
+  padding:16px 14px;
+  text-align:left;
+  cursor:pointer;
+  transition:border-color .2s, background .2s, transform .12s var(--ease);
+}
+.mode-card:active{ transform:scale(.97); }
+.mode-card .mi{ font-size:22px; margin-bottom:8px; display:block; }
+.mode-card .mt{ font-size:14.5px; font-weight:800; margin-bottom:3px; }
+.mode-card .md{ font-size:11.5px; color:var(--text-faint); line-height:1.35; }
+.mode-card.selected{
+  border-color:var(--gold);
+  background:var(--gold-soft);
+}
+.mode-card.selected .mt{ color:var(--gold); }
+
+/* Category grid */
+.cat-grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:9px;
+}
+.cat-chip{
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:12px 6px;
+  text-align:center;
+  cursor:pointer;
+  transition:border-color .2s, background .2s, transform .12s var(--ease);
+}
+.cat-chip:active{ transform:scale(.94); }
+.cat-chip .ci{ font-size:20px; display:block; margin-bottom:4px; }
+.cat-chip .ct{ font-size:11px; font-weight:700; color:var(--text-muted); letter-spacing:-.01em; }
+.cat-chip.selected{ border-color:var(--gold); background:var(--gold-soft); }
+.cat-chip.selected .ct{ color:var(--gold); }
+
+.undercover-note{
+  background:var(--teal-soft);
+  border:1px solid rgba(69,214,196,.3);
+  border-radius:var(--radius-md);
+  padding:14px 16px;
+  font-size:13px;
+  color:#BEF3EC;
+  line-height:1.5;
+}
+
+/* Chip row (timer duration) */
+.chip-row{ display:flex; gap:8px; flex-wrap:wrap; }
+.chip{
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:100px;
+  padding:10px 16px;
+  font-size:13.5px;
+  font-weight:700;
+  color:var(--text-muted);
+  cursor:pointer;
+  transition:border-color .2s, background .2s, color .2s;
+}
+.chip.selected{ border-color:var(--gold); background:var(--gold-soft); color:var(--gold); }
+
+.toggle-row{
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-md); padding:14px 16px;
+}
+.toggle-row .stepper-title{ margin-bottom:1px; }
+.switch{
+  width:48px;height:29px;border-radius:100px;
+  background:var(--surface-3);
+  position:relative;
+  cursor:pointer;
+  transition:background .2s;
+  border:1px solid var(--border);
+  flex-shrink:0;
+}
+.switch::after{
+  content:"";
+  position:absolute;
+  top:2px; left:2px;
+  width:23px;height:23px;
+  border-radius:50%;
+  background:#fff;
+  transition:transform .22s var(--ease);
+  box-shadow:0 2px 6px rgba(0,0,0,.3);
+}
+.switch.on{ background:linear-gradient(155deg,#F3CA6B,var(--gold)); }
+.switch.on::after{ transform:translateX(19px); }
+
+/* ==========================================================================
+   PROGRESS DOTS (reveal flow)
+   ========================================================================== */
+.progress-row{
+  display:flex;
+  gap:6px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-bottom:8px;
+}
+.dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--surface-3);
+  transition:background .25s, transform .25s;
+}
+.dot.done{ background:var(--gold); }
+.dot.current{ background:var(--teal); transform:scale(1.35); }
+
+/* ==========================================================================
+   REVEAL SCREEN
+   ========================================================================== */
+#screen-reveal{ align-items:center; text-align:center; justify-content:flex-start; padding-top:calc(env(safe-area-inset-top) + 14px); }
+.player-turn-label{ font-size:14px; color:var(--text-muted); margin:14px 0 2px; }
+.player-turn-name{ font-size:26px; font-weight:800; margin-bottom:26px; letter-spacing:-.01em; }
+
+.reveal-stage{
+  flex:1;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  perspective:1400px;
+}
+.reveal-card{
+  width:min(78vw, 320px);
+  aspect-ratio:3/4.1;
+  position:relative;
+  transform-style:preserve-3d;
+  transition:transform .7s var(--ease);
+  cursor:pointer;
+}
+.reveal-card.flipped{ transform:rotateY(180deg); }
+.reveal-face{
+  position:absolute; inset:0;
+  border-radius:26px;
+  backface-visibility:hidden;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:26px;
+  border:1px solid var(--border);
+}
+.reveal-face.front{
+  background:
+    radial-gradient(120% 90% at 50% 0%, #232B3D 0%, var(--surface) 60%);
+  box-shadow:var(--shadow-lg);
+}
+.reveal-face.front .lock-icon{
+  font-size:44px;
+  margin-bottom:18px;
+  filter:grayscale(.2) opacity(.85);
+}
+.reveal-face.front .tap-label{ font-size:15px; font-weight:700; color:var(--text-muted); }
+.reveal-face.back{
+  transform:rotateY(180deg);
+  background: radial-gradient(120% 90% at 50% 0%, #232B3D 0%, var(--surface) 60%);
+  box-shadow:var(--shadow-lg);
+  overflow:hidden;
+}
+.reveal-face.back.is-crew{ box-shadow:var(--shadow-lg), 0 0 0 2px var(--gold) inset; }
+.reveal-face.back .role-tag{
+  font-size:11.5px;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  padding:6px 14px;
+  border-radius:100px;
+  margin-bottom:18px;
+}
+.role-tag.crew{ background:var(--gold-soft); color:var(--gold); }
+.role-tag.impostor{ background:var(--danger-soft); color:var(--danger); }
+.role-tag.underA{ background:var(--gold-soft); color:var(--gold); }
+.role-tag.underB{ background:var(--teal-soft); color:var(--teal); }
+.reveal-word{
+  font-size:30px;
+  font-weight:800;
+  letter-spacing:-.01em;
+  line-height:1.15;
+  word-break:break-word;
+}
+.reveal-word.is-impostor{ font-size:22px; }
+.reveal-sub{ margin-top:12px; font-size:12.5px; color:var(--text-faint); line-height:1.4; padding:0 6px; }
+
+.sheen{
+  position:absolute; inset:0;
+  background:linear-gradient(115deg, transparent 40%, rgba(232,184,75,.35) 50%, transparent 60%);
+  transform:translateX(-120%);
+  pointer-events:none;
+}
+.reveal-card.flipped .sheen{ animation:sheenMove .9s var(--ease) .05s; }
+@keyframes sheenMove{ to{ transform:translateX(120%); } }
+
+.reveal-actions{ width:100%; padding-top:18px; }
+
+/* Blackout / pass-phone transition */
+#screen-blackout{
+  align-items:center; justify-content:center; text-align:center;
+  background:#000;
+}
+.blackout-icon{ font-size:46px; margin-bottom:18px; opacity:.9; }
+.blackout-text{ font-size:19px; font-weight:700; margin-bottom:6px; }
+.blackout-sub{ font-size:14px; color:var(--text-faint); margin-bottom:34px; }
+
+/* ==========================================================================
+   DISCUSSION / DONE / TIMER SCREENS
+   ========================================================================== */
+#screen-alldone, #screen-end{ align-items:center; justify-content:center; text-align:center; }
+.big-icon{ font-size:56px; margin-bottom:20px; }
+
+#screen-timer{ align-items:center; justify-content:flex-start; padding-top:calc(env(safe-area-inset-top) + 28px); text-align:center; }
+.timer-ring-wrap{ position:relative; width:250px; height:250px; margin:18px auto 26px; }
+.timer-ring-wrap svg{ width:100%; height:100%; transform:rotate(-90deg); }
+.ring-bg{ fill:none; stroke:var(--surface-2); stroke-width:10; }
+.ring-fg{ fill:none; stroke:var(--gold); stroke-width:10; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.timer-display{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+.timer-time{ font-size:46px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
+.timer-label{ font-size:12.5px; color:var(--text-faint); margin-top:4px; text-transform:uppercase; letter-spacing:.08em; }
+.timer-ring-wrap.pulse .ring-fg{ stroke:var(--danger); }
+
+/* ==========================================================================
+   MISC UTIL
+   ========================================================================== */
+.hidden{ display:none !important; }
+::-webkit-scrollbar{ display:none; }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============================== SETUP ============================== -->
+  <section id="screen-setup" class="screen active">
+   <div class="setup-scroll">
+    <div class="brand">
+      <div class="brand-mark">🕵️</div>
+      <div>
+        <div class="brand-name">Infiltrado</div>
+        <div class="brand-tag">Impostor · Undercover</div>
+      </div>
+    </div>
+
+    <div class="section-label">Jugadores</div>
+    <div class="stepper">
+      <div class="stepper-info">
+        <div class="stepper-title">Cantidad de jugadores</div>
+        <div class="stepper-desc">Entre 3 y 20 personas</div>
+      </div>
+      <div class="stepper-controls">
+        <button class="stepper-btn" data-action="players-dec">−</button>
+        <div class="stepper-value" id="players-value">6</div>
+        <button class="stepper-btn" data-action="players-inc">+</button>
+      </div>
+    </div>
+
+    <div class="stepper">
+      <div class="stepper-info">
+        <div class="stepper-title" id="infiltrator-title">Cantidad de impostores</div>
+        <div class="stepper-desc">Entre 1 y 5</div>
+      </div>
+      <div class="stepper-controls">
+        <button class="stepper-btn" data-action="impostors-dec">−</button>
+        <div class="stepper-value" id="impostors-value">1</div>
+        <button class="stepper-btn" data-action="impostors-inc">+</button>
+      </div>
+    </div>
+
+    <div class="section-label">Modo de juego</div>
+    <div class="mode-grid">
+      <div class="mode-card selected" data-mode="classic">
+        <span class="mi">🕵️</span>
+        <div class="mt">Impostor clásico</div>
+        <div class="md">Casi todos comparten palabra. Los impostores no la conocen.</div>
+      </div>
+      <div class="mode-card" data-mode="undercover">
+        <span class="mi">🎭</span>
+        <div class="mt">Undercover</div>
+        <div class="md">Dos palabras muy parecidas. Descubrí quién tiene la otra.</div>
+      </div>
+    </div>
+
+    <div id="category-section">
+      <div class="section-label">Categoría</div>
+      <div class="cat-grid" id="category-grid"><!-- filled by JS --></div>
+    </div>
+
+    <div id="undercover-note-wrap" class="hidden">
+      <div class="section-label">Categoría</div>
+      <div class="undercover-note">🎭 En modo Undercover las palabras salen de una gran base de parejas parecidas (ej: Pizza / Empanada). No hace falta elegir categoría.</div>
+    </div>
+
+    <div class="section-label">Duración de la discusión</div>
+    <div class="chip-row" id="timer-chip-row"><!-- filled by JS --></div>
+
+    <div class="section-label">Sonido</div>
+    <div class="toggle-row">
+      <div>
+        <div class="stepper-title">Sonido al finalizar</div>
+        <div class="stepper-desc">Reproduce una alarma suave</div>
+      </div>
+      <div class="switch on" id="sound-switch"></div>
+    </div>
+
+   </div>
+   <div class="setup-footer">
+      <button class="btn btn-primary" id="btn-start">Comenzar</button>
+   </div>
+  </section>
+
+  <!-- ============================== REVEAL ============================== -->
+  <section id="screen-reveal" class="screen">
+    <div class="progress-row" id="progress-row"></div>
+    <div class="player-turn-label">Turno de</div>
+    <div class="player-turn-name" id="player-turn-name">Jugador 1</div>
+
+    <div class="reveal-stage">
+      <div class="reveal-card" id="reveal-card">
+        <div class="reveal-face front">
+          <div class="lock-icon">🔒</div>
+          <div class="tap-label">Toca para ver tu palabra</div>
+        </div>
+        <div class="reveal-face back" id="reveal-back">
+          <div class="sheen"></div>
+          <div class="role-tag" id="role-tag">PALABRA</div>
+          <div class="reveal-word" id="reveal-word">—</div>
+          <div class="reveal-sub" id="reveal-sub">Memorizala y ocultá la pantalla</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal-actions">
+      <button class="btn btn-primary" id="btn-reveal-toggle">Ver mi palabra</button>
+    </div>
+  </section>
+
+  <!-- ============================== BLACKOUT ============================== -->
+  <section id="screen-blackout" class="screen">
+    <div class="blackout-icon">📵</div>
+    <div class="blackout-text" id="blackout-text">Pasále el teléfono a Jugador 2</div>
+    <div class="blackout-sub">No mires la pantalla hasta que sea tu turno</div>
+    <button class="btn btn-primary" id="btn-next-player" style="max-width:280px;">Continuar</button>
+  </section>
+
+  <!-- ============================== ALL DONE ============================== -->
+  <section id="screen-alldone" class="screen">
+    <div class="big-icon">✅</div>
+    <h1 class="title">Todos vieron su palabra</h1>
+    <p class="subtitle">Guarden el secreto. Cuando estén listos, arranca la discusión.</p>
+    <button class="btn btn-primary" id="btn-start-discussion" style="max-width:320px;">Comenzar discusión</button>
+  </section>
+
+  <!-- ============================== TIMER ============================== -->
+  <section id="screen-timer" class="screen">
+    <div class="eyebrow" style="text-align:center;width:100%;">Discusión en curso</div>
+    <h1 class="title" style="text-align:center;width:100%;">Debatan quién es sospechoso</h1>
+    <div class="timer-ring-wrap" id="timer-ring-wrap">
+      <svg viewBox="0 0 120 120">
+        <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+        <circle class="ring-fg" id="ring-fg" cx="60" cy="60" r="52"></circle>
+      </svg>
+      <div class="timer-display">
+        <div class="timer-time" id="timer-time">01:30</div>
+        <div class="timer-label">restante</div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="btn-row" style="margin-bottom:10px;">
+      <button class="btn btn-secondary" id="btn-timer-pause">Pausar</button>
+      <button class="btn btn-danger" id="btn-timer-end">Terminar</button>
+    </div>
+  </section>
+
+  <!-- ============================== END ============================== -->
+  <section id="screen-end" class="screen">
+    <div class="big-icon">🏁</div>
+    <h1 class="title">Fin de la ronda</h1>
+    <p class="subtitle">¿Descubrieron al infiltrado? Elijan qué hacer ahora.</p>
+    <div style="width:100%; max-width:340px; display:flex; flex-direction:column; gap:12px;">
+      <button class="btn btn-primary" id="btn-restart">Reiniciar partida</button>
+      <button class="btn btn-secondary" id="btn-newgame">Nueva partida</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ==========================================================================
+   DATA — CATEGORY WORD BANKS (100+ words each, Spanish)
+   ========================================================================== */
+const CATEGORIES = {
+  comidas: { icon:'🍕', label:'Comidas', words:[
+    'Pizza','Hamburguesa','Tacos','Sushi','Paella','Empanada','Lasaña','Spaghetti','Ravioli','Ñoquis',
+    'Ceviche','Asado','Milanesa','Arepa','Tamal','Burrito','Quesadilla','Enchilada','Guacamole','Nachos',
+    'Hot dog','Sandwich','Ensalada','Sopa','Caldo','Puchero','Locro','Humita','Pastel','Tarta',
+    'Pan','Pan dulce','Medialuna','Croissant','Bagel','Pretzel','Waffle','Panqueque','Crepe','Omelette',
+    'Huevos revueltos','Tortilla española','Gazpacho','Risotto','Curry','Ramen','Pho','Dim sum','Wonton','Kebab',
+    'Shawarma','Falafel','Hummus','Tabule','Couscous','Gyro','Moussaka','Fondue','Raclette','Quiche',
+    'Cassoulet','Fabada','Cocido','Pollo frito','Costillas','Bife','Churrasco','Chorizo','Morcilla','Salchicha',
+    'Jamón','Queso','Mozzarella','Provolone','Parmesano','Roquefort','Brie','Camembert','Yogur','Helado',
+    'Flan','Arroz con leche','Tiramisú','Cheesecake','Brownie','Galletas','Torta','Cupcake','Dona','Churro',
+    'Alfajor','Turrón','Mazapán','Chocolate','Caramelo','Gelatina','Budín','Strudel','Pozole','Mole',
+    'Chilaquiles','Guiso','Estofado','Escabeche','Milhojas','Mousse','Crema catalana','Torrijas'
+  ]},
+  bebidas: { icon:'🥤', label:'Bebidas', words:[
+    'Agua','Café','Té','Mate','Leche','Jugo','Gaseosa','Cerveza','Vino','Champagne',
+    'Whisky','Vodka','Ron','Tequila','Gin','Fernet','Coca Cola','Sprite','Fanta','Limonada',
+    'Naranjada','Batido','Licuado','Smoothie','Chocolate caliente','Capuchino','Latte','Espresso','Americano','Té verde',
+    'Té negro','Manzanilla','Infusión','Agua con gas','Agua saborizada','Energizante','Isotónica','Gatorade','Red Bull','Monster',
+    'Sangría','Mojito','Daiquiri','Margarita','Piña colada','Caipirinha','Bloody Mary','Cosmopolitan','Martini','Cava',
+    'Sidra','Vermut','Cognac','Brandy','Absenta','Sake','Pisco','Chicha','Horchata','Tereré',
+    'Cocoa','Malteada','Frappé','Granizado','Refresco','Ponche','Rompope','Atole','Whiskey escocés','Bourbon',
+    'Mezcal','Aperol','Campari','Amaretto','Baileys','Kahlúa','Té helado','Café con leche','Cortado','Té chai',
+    'Yerba mate','Kombucha','Jugo de naranja','Jugo de manzana','Jugo de uva','Agua de coco','Leche de almendras','Leche de soja','Leche de avena','Batido de proteína',
+    'Cerveza artesanal','Cerveza negra','Cerveza rubia','Vino tinto','Vino blanco','Vino rosado','Espumante','Bebida energética','Té matcha','Café irlandés',
+    'Agua tónica'
+  ]},
+  animales: { icon:'🐾', label:'Animales', words:[
+    'Perro','Gato','Caballo','Vaca','Cerdo','Oveja','Cabra','Gallina','Pato','Ganso',
+    'Pavo','Conejo','Ratón','Rata','Hámster','Cobayo','León','Tigre','Leopardo','Jaguar',
+    'Puma','Lince','Elefante','Rinoceronte','Hipopótamo','Jirafa','Cebra','Camello','Llama','Alpaca',
+    'Oso','Oso panda','Oso polar','Lobo','Zorro','Coyote','Hiena','Mono','Gorila','Chimpancé',
+    'Orangután','Canguro','Koala','Ornitorrinco','Murciélago','Erizo','Ardilla','Topo','Nutria','Castor',
+    'Foca','Morsa','Delfín','Ballena','Tiburón','Orca','Pulpo','Calamar','Medusa','Estrella de mar',
+    'Cangrejo','Langosta','Camarón','Almeja','Ostra','Pez espada','Atún','Salmón','Trucha','Piraña',
+    'Anguila','Rana','Sapo','Salamandra','Tortuga','Cocodrilo','Caimán','Iguana','Camaleón','Lagartija',
+    'Serpiente','Víbora','Cobra','Pitón','Águila','Halcón','Búho','Lechuza','Cuervo','Loro',
+    'Papagayo','Colibrí','Flamenco','Pingüino','Avestruz','Pelícano','Cisne','Paloma','Gorrión','Golondrina',
+    'Abeja','Avispa','Mariposa','Hormiga','Araña','Escorpión','Grillo','Escarabajo','Luciérnaga'
+  ]},
+  objetos: { icon:'📦', label:'Objetos', words:[
+    'Silla','Mesa','Cama','Sofá','Almohada','Manta','Lámpara','Espejo','Reloj','Teléfono',
+    'Televisor','Control remoto','Llave','Cerradura','Puerta','Ventana','Cortina','Alfombra','Escoba','Trapeador',
+    'Balde','Esponja','Jabón','Cepillo de dientes','Toalla','Peine','Tijeras','Cuchillo','Tenedor','Cuchara',
+    'Plato','Vaso','Taza','Olla','Sartén','Cacerola','Batidora','Licuadora','Microondas','Refrigerador',
+    'Horno','Tostadora','Cafetera','Plancha','Aspiradora','Lavadora','Secadora','Mochila','Cartera','Billetera',
+    'Paraguas','Bufanda','Guantes','Sombrero','Gorra','Cinturón','Zapatos','Zapatillas','Botas','Bolso',
+    'Maleta','Libro','Cuaderno','Lápiz','Lapicera','Borrador','Regla','Pegamento','Grapadora','Calculadora',
+    'Computadora','Teclado','Mouse','Impresora','Cargador','Auriculares','Parlante','Cámara','Linterna','Vela',
+    'Fósforos','Encendedor','Bicicleta','Auto','Moto','Patineta','Casco','Silla de ruedas','Termómetro','Vendaje',
+    'Botiquín','Jeringa','Balanza','Cinta métrica','Martillo','Destornillador','Clavo','Tornillo','Taladro','Serrucho',
+    'Cuerda','Candado','Llavero','Maceta','Regadera'
+  ]},
+  profesiones: { icon:'👔', label:'Profesiones', words:[
+    'Médico','Enfermero','Dentista','Cirujano','Psicólogo','Veterinario','Abogado','Juez','Policía','Bombero',
+    'Militar','Piloto','Azafata','Ingeniero','Arquitecto','Electricista','Plomero','Carpintero','Albañil','Pintor',
+    'Mecánico','Chofer','Taxista','Camionero','Cocinero','Chef','Panadero','Pastelero','Carnicero','Mesero',
+    'Bartender','Profesor','Maestro','Director','Científico','Astronauta','Astrónomo','Biólogo','Químico','Físico',
+    'Matemático','Contador','Economista','Banquero','Vendedor','Cajero','Recepcionista','Secretario','Periodista','Escritor',
+    'Editor','Traductor','Fotógrafo','Diseñador','Programador','Analista de datos','Actor','Actriz','Cantante','Músico',
+    'Bailarín','Modelo','Diseñador de moda','Estilista','Peluquero','Maquillador','Agricultor','Ganadero','Pescador','Minero',
+    'Jardinero','Guardia de seguridad','Detective','Espía','Diplomático','Político','Alcalde','Presidente','Sacerdote','Pastor',
+    'Rabino','Monje','Bibliotecario','Archivista','Historiador','Filósofo','Sociólogo','Antropólogo','Nutricionista','Farmacéutico',
+    'Kinesiólogo','Fisioterapeuta','Terapeuta','Entrenador personal','Árbitro','Deportista profesional','Entrenador de fútbol','Guía turístico','Repartidor','Notario'
+  ]},
+  paises: { icon:'🌍', label:'Países', words:[
+    'Argentina','Brasil','Chile','Uruguay','Paraguay','Bolivia','Perú','Ecuador','Colombia','Venezuela',
+    'México','Cuba','Panamá','Costa Rica','Nicaragua','Honduras','Guatemala','El Salvador','República Dominicana','Estados Unidos',
+    'Canadá','España','Portugal','Francia','Italia','Alemania','Reino Unido','Irlanda','Holanda','Bélgica',
+    'Suiza','Austria','Suecia','Noruega','Dinamarca','Finlandia','Islandia','Polonia','República Checa','Hungría',
+    'Rumania','Grecia','Turquía','Rusia','Ucrania','China','Japón','Corea del Sur','Corea del Norte','India',
+    'Pakistán','Bangladesh','Indonesia','Filipinas','Vietnam','Tailandia','Malasia','Singapur','Australia','Nueva Zelanda',
+    'Egipto','Marruecos','Argelia','Túnez','Nigeria','Sudáfrica','Kenia','Etiopía','Ghana','Israel',
+    'Arabia Saudita','Emiratos Árabes Unidos','Qatar','Irán','Irak','Siria','Líbano','Jordania','Afganistán','Mongolia',
+    'Kazajistán','Croacia','Serbia','Bosnia','Bulgaria','Eslovaquia','Eslovenia','Lituania','Letonia','Estonia',
+    'Luxemburgo','Mónaco','Andorra','San Marino','Vaticano','Chipre','Malta','Fiyi','Haití','Jamaica',
+    'Kuwait','Bahréin','Omán','Yemen','Camerún','Uganda','Senegal','Costa de Marfil'
+  ]},
+  ciudades: { icon:'🏙️', label:'Ciudades', words:[
+    'Buenos Aires','Córdoba','Rosario','Mendoza','La Plata','Mar del Plata','Santiago','Valparaíso','Lima','Cusco',
+    'Bogotá','Medellín','Cartagena','Quito','Guayaquil','Caracas','Montevideo','Asunción','La Paz','Santa Cruz',
+    'Ciudad de México','Guadalajara','Monterrey','Cancún','La Habana','San Juan','Ciudad de Panamá','San José','Nueva York','Los Ángeles',
+    'Chicago','Miami','San Francisco','Las Vegas','Washington','Boston','Houston','Toronto','Montreal','Vancouver',
+    'Madrid','Barcelona','Sevilla','Valencia','Bilbao','Lisboa','Oporto','París','Marsella','Lyon',
+    'Roma','Milán','Nápoles','Venecia','Florencia','Berlín','Múnich','Hamburgo','Fráncfort','Londres',
+    'Mánchester','Liverpool','Dublín','Ámsterdam','Bruselas','Viena','Zúrich','Ginebra','Estocolmo','Oslo',
+    'Copenhague','Helsinki','Varsovia','Praga','Budapest','Moscú','San Petersburgo','Estambul','Atenas','El Cairo',
+    'Casablanca','Dubái','Doha','Tokio','Osaka','Kioto','Seúl','Pekín','Shanghái','Hong Kong',
+    'Bangkok','Yakarta','Manila','Sídney','Melbourne','Auckland','Nairobi','Lagos','Johannesburgo','Ciudad del Cabo',
+    'Tel Aviv','Jerusalén'
+  ]},
+  deportes: { icon:'⚽', label:'Deportes', words:[
+    'Fútbol','Básquetbol','Vóley','Tenis','Golf','Rugby','Béisbol','Hockey','Natación','Atletismo',
+    'Boxeo','Karate','Judo','Taekwondo','Esgrima','Ciclismo','Ciclismo de montaña','Motociclismo','Automovilismo','Fórmula 1',
+    'Skateboard','Surf','Snowboard','Esquí','Patinaje artístico','Patinaje sobre hielo','Gimnasia artística','Gimnasia rítmica','Levantamiento de pesas','Crossfit',
+    'Yoga','Pilates','Remo','Kayak','Vela','Buceo','Pesca deportiva','Escalada','Senderismo','Triatlón',
+    'Maratón','Vóley playa','Handball','Water polo','Squash','Bádminton','Tenis de mesa','Billar','Bolos','Dardos',
+    'Ajedrez','Póker','Rally','Motocross','Paracaidismo','Parapente','Ala delta','Tiro con arco','Tiro deportivo','Equitación',
+    'Polo','Cricket','Softbol','Lacrosse','Curling','Biatlón','Salto con esquís','Bobsleigh','Luge','Halterofilia',
+    'Lucha libre','Sumo','Kickboxing','Muay Thai','Jiu jitsu','Capoeira','Fútbol americano','Fútbol sala','Fútbol playa','Rugby seven',
+    'Netball','Floorball','Petanca','Frisbee','Ultimate','Parkour','Calistenia','Spinning','Zumba','Aeróbica',
+    'Danza deportiva','Nado sincronizado','Clavados','Pentatlón','Decatlón','Heptatlón','Orientación','Bochas','Tejo','Frontón'
+  ]},
+  marcas: { icon:'🏷️', label:'Marcas', words:[
+    'Coca Cola','Pepsi','Nike','Adidas','Puma','Reebok','Apple','Samsung','Sony','LG',
+    'Microsoft','Google','Amazon','Netflix','Disney','McDonald\'s','Burger King','KFC','Starbucks','Subway',
+    'Ferrari','Lamborghini','Porsche','Toyota','Honda','Ford','Chevrolet','BMW','Mercedes-Benz','Audi',
+    'Volkswagen','Fiat','Renault','Peugeot','Nissan','Hyundai','Kia','Tesla','Nokia','Motorola',
+    'Huawei','Xiaomi','Intel','AMD','Nvidia','Dell','HP','Lenovo','Canon','Nikon',
+    'Gillette','Colgate','Dove','Pantene','Head & Shoulders','L\'Oréal','Nivea','Chanel','Gucci','Louis Vuitton',
+    'Prada','Versace','Armani','Zara','H&M','Levi\'s','Calvin Klein','Tommy Hilfiger','Ralph Lauren','Rolex',
+    'Casio','Lego','Barbie','Hot Wheels','Mattel','Hasbro','Fisher-Price','Kellogg\'s','Nestlé','Danone',
+    'Oreo','Milka','Cadbury','Ferrero','Nutella','Bimbo','Red Bull','Monster Energy','Gatorade','Heinz',
+    'Knorr','Lipton','Facebook','Instagram','WhatsApp','TikTok','Twitter','YouTube','Spotify','PayPal',
+    'Visa','Mastercard'
+  ]},
+  series: { icon:'📺', label:'Series', words:[
+    'Friends','Breaking Bad','Stranger Things','Game of Thrones','The Office','Los Simpson','Dark','La Casa de Papel','Narcos','The Crown',
+    'Peaky Blinders','Better Call Saul','The Walking Dead','Prison Break','How I Met Your Mother','Grey\'s Anatomy','The Big Bang Theory','Modern Family','Suits','Dexter',
+    'Lost','Sherlock','House','Doctor Who','Black Mirror','The Boys','Wednesday','Euphoria','Ozark','Vikings',
+    'Rick and Morty','South Park','Bob Esponja','Los Padrinos Mágicos','Pokémon','Dragon Ball','Naruto','One Piece','Death Note','Attack on Titan',
+    'Fullmetal Alchemist','Chainsaw Man','Demon Slayer','Sailor Moon','Rugrats','El Chavo del 8','El Chapulín Colorado','Élite','Sex Education','Cobra Kai',
+    'You','The Witcher','Bridgerton','El Juego del Calamar','Chernobyl','Band of Brothers','True Detective','Fargo','American Horror Story','Riverdale',
+    'Gossip Girl','Pretty Little Liars','13 Reasons Why','Outer Banks','Emily in Paris','The Mandalorian','Loki','WandaVision','Daredevil','Arrow',
+    'The Flash','Supernatural','Smallville','Malcolm el de en medio','Two and a Half Men','Seinfeld','Frasier','Cheers','ER','CSI',
+    'Criminal Minds','NCIS','Bones','Monk','Columbo','Twin Peaks','Expediente X','Buffy la Cazavampiros','Charmed','Gilmore Girls',
+    'Desperate Housewives','Sons of Anarchy','Mad Men','House of Cards','Los Soprano','Baywatch',
+    'Full House','Los Años Maravillosos','El Príncipe del Rap','Plaza Sésamo'
+  ]},
+  peliculas: { icon:'🎬', label:'Películas', words:[
+    'Titanic','Avatar','El Padrino','Star Wars','Jurassic Park','El Señor de los Anillos','Harry Potter','Matrix','Forrest Gump','El Rey León',
+    'Toy Story','Shrek','Buscando a Nemo','Frozen','Coco','Up','Los Increíbles','Cars','Ratatouille','Wall-E',
+    'Inside Out','Vengadores','Iron Man','Spider-Man','Batman','Superman','Wonder Woman','Joker','Deadpool','Guardianes de la Galaxia',
+    'Black Panther','Doctor Strange','Capitán América','Thor','Terminator','Alien','Depredador','Rocky','Rambo','Duro de Matar',
+    'Misión Imposible','James Bond','Rápidos y Furiosos','John Wick','Kill Bill','Pulp Fiction','El Club de la Pelea','El Origen','Interestelar','El Caballero de la Noche',
+    'Gladiador','Braveheart','La La Land','Whiplash','Parásitos','Roma','Nomadland','El Irlandés','Érase una vez en Hollywood','Ex Machina',
+    'Blade Runner','Dune','Mad Max','Bohemian Rhapsody','El Gran Showman','Grease','Mamma Mia','Sonrisas y Lágrimas','Cantando bajo la Lluvia','El Mago de Oz',
+    'E.T.','Regreso al Futuro','Indiana Jones','Jumanji','Pesadilla antes de Navidad','La Novia Cadáver','Coraline','El Laberinto del Fauno','Amélie','Cinema Paradiso',
+    'La Vida es Bella','Titanes del Pacífico','Godzilla','King Kong','La Momia','Drácula','Frankenstein','El Exorcista','El Conjuro','IT',
+    'Annabelle','Saw','Scream','Halloween','Viernes 13','Pesadilla en Elm Street','Los Cazafantasmas','Men in Black','El Show de Truman','Náufrago'
+  ]},
+  musica: { icon:'🎵', label:'Música', words:[
+    'Michael Jackson','Madonna','Beyoncé','Rihanna','Adele','Ed Sheeran','Bruno Mars','Justin Bieber','Taylor Swift','Ariana Grande',
+    'Katy Perry','Lady Gaga','Shakira','Karol G','Bad Bunny','J Balvin','Maluma','Daddy Yankee','Rosalía','Rauw Alejandro',
+    'Ozuna','Anuel AA','Wisin y Yandel','Don Omar','Calle 13','Juanes','Carlos Vives','Marc Anthony','Enrique Iglesias','Ricky Martin',
+    'Luis Miguel','Vicente Fernández','Juan Gabriel','Selena','Gloria Trevi','Thalía','Paulina Rubio','RBD','Maná','Soda Stereo',
+    'Gustavo Cerati','Charly García','Fito Páez','Andrés Calamaro','Los Redondos','Divididos','Café Tacvba','Molotov','Los Fabulosos Cadillacs','Los Piojos',
+    'Babasónicos','Queen','The Beatles','The Rolling Stones','Led Zeppelin','Pink Floyd','AC/DC','Metallica','Nirvana','Guns N\' Roses',
+    'U2','Coldplay','Radiohead','Red Hot Chili Peppers','Aerosmith','Bon Jovi','Eminem','Jay-Z','Kanye West','Drake',
+    'Kendrick Lamar','50 Cent','Snoop Dogg','Dr. Dre','The Weeknd','Post Malone','Travis Scott','Billie Eilish','Dua Lipa','Harry Styles',
+    'Shawn Mendes','Sam Smith','Elton John','David Bowie','Prince','Whitney Houston','Mariah Carey','Celine Dion','Stevie Wonder','Frank Sinatra',
+    'Elvis Presley','Bob Marley','ABBA','Bee Gees','Michael Bublé','Norah Jones','Amy Winehouse','Camila Cabello',
+    'Rammstein','Foo Fighters'
+  ]},
+  famosos: { icon:'🌟', label:'Famosos', words:[
+    'Lionel Messi','Cristiano Ronaldo','Neymar','Kylian Mbappé','Diego Maradona','Pelé','Ronaldinho','LeBron James','Michael Jordan','Kobe Bryant',
+    'Serena Williams','Rafael Nadal','Roger Federer','Novak Djokovic','Usain Bolt','Michael Phelps','Tom Cruise','Brad Pitt','Leonardo DiCaprio','Johnny Depp',
+    'Will Smith','Denzel Washington','Robert Downey Jr.','Chris Hemsworth','Scarlett Johansson','Angelina Jolie','Jennifer Lawrence','Emma Watson','Meryl Streep','Tom Hanks',
+    'Morgan Freeman','Keanu Reeves','Dwayne Johnson','Jason Statham','Vin Diesel','Ryan Reynolds','Hugh Jackman','Chris Evans','Robert Pattinson','Zendaya',
+    'Timothée Chalamet','Margot Robbie','Elon Musk','Bill Gates','Steve Jobs','Mark Zuckerberg','Jeff Bezos','Warren Buffett','Oprah Winfrey','Barack Obama',
+    'Donald Trump','Joe Biden','Vladimir Putin','Nelson Mandela','Albert Einstein','Isaac Newton','Charles Darwin','Nikola Tesla','Marie Curie','Stephen Hawking',
+    'Pablo Picasso','Salvador Dalí','Frida Kahlo','Vincent van Gogh','Leonardo da Vinci','William Shakespeare','Gabriel García Márquez','Jorge Luis Borges','Pablo Neruda','Walt Disney',
+    'Charlie Chaplin','Marilyn Monroe','Audrey Hepburn','Freddie Mercury','John Lennon','Bob Dylan','Steven Spielberg','Quentin Tarantino','Christopher Nolan','James Cameron',
+    'Martin Scorsese','Alfred Hitchcock','Stan Lee','J.K. Rowling','Kim Kardashian','Kylie Jenner','Selena Gomez','Miley Cyrus','Justin Timberlake','Ellen DeGeneres',
+    'Gordon Ramsay','David Beckham','Michael Schumacher','Lewis Hamilton','Valentino Rossi','Simone Biles',
+    'Rihanna','Kim Jong-un','Greta Thunberg','Malala Yousafzai'
+  ]},
+  tecnologia: { icon:'💻', label:'Tecnología', words:[
+    'Computadora','Laptop','Smartphone','Tablet','Internet','WiFi','Bluetooth','Software','Hardware','Aplicación',
+    'Inteligencia artificial','Robot','Dron','Realidad virtual','Realidad aumentada','Blockchain','Criptomoneda','Bitcoin','Nube','Servidor',
+    'Base de datos','Programación','Algoritmo','Código','Navegador','Buscador','Red social','Correo electrónico','Contraseña','Antivirus',
+    'Firewall','Sistema operativo','Windows','MacOS','Linux','Android','iOS','Procesador','Memoria RAM','Disco duro',
+    'Tarjeta gráfica','Pantalla táctil','Impresora 3D','GPS','Sensor','Cámara digital','Micrófono','Altavoz','Auriculares inalámbricos','Cargador',
+    'Batería','Chip','Circuito','Placa madre','Router','Módem','Fibra óptica','Satélite','Cohete','Nanotecnología',
+    'Biotecnología','Domótica','Smart TV','Smartwatch','Consola de videojuegos','Realidad mixta','Chatbot','Asistente virtual','Reconocimiento facial','Reconocimiento de voz',
+    'Automatización','Robótica','Impresión 3D','Vehículo autónomo','Energía solar','Batería eléctrica','Auto eléctrico','Streaming','Podcasting','Videollamada',
+    'Mensajería instantánea','Firmware','Código abierto','Ciberseguridad','Hackeo','Phishing','Malware','Ransomware','Encriptación','Token',
+    'NFT','Metaverso','Wearable','Termostato inteligente','Altavoz inteligente','Realidad extendida','Machine learning','Big data','Red neuronal',
+    'Impresora láser'
+  ]},
+  videojuegos: { icon:'🎮', label:'Videojuegos', words:[
+    'Minecraft','Fortnite','Among Us','Roblox','Call of Duty','FIFA','Grand Theft Auto','Red Dead Redemption','The Legend of Zelda','Super Mario',
+    'Mario Kart','Pokémon','Animal Crossing','Los Sims','League of Legends','Valorant','Overwatch','Counter-Strike','Apex Legends','PUBG',
+    'Free Fire','Clash Royale','Clash of Clans','Candy Crush','Angry Birds','Fruit Ninja','Temple Run','Subway Surfers','Genshin Impact','World of Warcraft',
+    'Final Fantasy','Kingdom Hearts','Resident Evil','Silent Hill','Dark Souls','Elden Ring','Bloodborne','Sekiro','God of War','Uncharted',
+    'The Last of Us','Horizon Zero Dawn','Spider-Man','Batman Arkham','Assassin\'s Creed','Far Cry','Watch Dogs','Cyberpunk 2077','The Witcher','Skyrim',
+    'Fallout','Portal','Half-Life','Left 4 Dead','Team Fortress','Dota 2','Starcraft','Diablo','Hearthstone','Rocket League',
+    'NBA 2K','Madden NFL','Tetris','Pac-Man','Space Invaders','Sonic the Hedgehog','Street Fighter','Mortal Kombat','Tekken','Super Smash Bros',
+    'Donkey Kong','Metroid','Kirby','Crash Bandicoot','Spyro','Rayman','Ratchet & Clank','Little Big Planet','Journey','Stardew Valley',
+    'Terraria','Don\'t Starve','Hollow Knight','Celeste','Cuphead','Undertale','Five Nights at Freddy\'s','Slender','Outlast','Dead by Daylight',
+    'It Takes Two','Fall Guys','Gartic Phone','Uno','Just Dance','Wii Sports','Splatoon','Overcooked','Pikmin','Bayonetta'
+  ]}
+};
+const CATEGORY_ORDER = ['comidas','bebidas','animales','objetos','profesiones','paises','ciudades','deportes','marcas','series','peliculas','musica','famosos','tecnologia','videojuegos'];
+
+/* Undercover pair bank — pairs of closely related words */
+const UNDERCOVER_PAIRS = [
+  ['Pizza','Empanada'],['Perro','Lobo'],['Café','Té'],['iPhone','Android'],['Gato','Tigre'],
+  ['Hamburguesa','Hot dog'],['Playa','Piscina'],['Río','Mar'],['Luna','Estrella'],['Bicicleta','Moto'],
+  ['Auto','Camioneta'],['Avión','Helicóptero'],['Tren','Subte'],['Invierno','Otoño'],['Verano','Primavera'],
+  ['Lluvia','Nieve'],['Sol','Fuego'],['Vaso','Taza'],['Silla','Banco'],['Mesa','Escritorio'],
+  ['Camisa','Remera'],['Pantalón','Short'],['Zapato','Zapatilla'],['Reloj','Despertador'],['Libro','Revista'],
+  ['Lápiz','Lapicera'],['Guitarra','Violín'],['Piano','Órgano'],['Fútbol','Rugby'],['Básquet','Vóley'],
+  ['Natación','Buceo'],['Perro','Gato'],['Águila','Halcón'],['León','Tigre'],['Elefante','Rinoceronte'],
+  ['Ballena','Delfín'],['Tiburón','Orca'],['Manzana','Pera'],['Naranja','Mandarina'],['Limón','Lima'],
+  ['Fresa','Frutilla'],['Chocolate','Cacao'],['Helado','Paleta'],['Torta','Pastel'],['Pan','Tostada'],
+  ['Queso','Manteca'],['Jamón','Salame'],['Vino','Champagne'],['Cerveza','Sidra'],['Whisky','Ron'],
+  ['Doctor','Enfermero'],['Maestro','Profesor'],['Policía','Militar'],['Bombero','Paramédico'],['Actor','Actriz'],
+  ['Cantante','Músico'],['Rey','Príncipe'],['Reina','Princesa'],['Bruja','Hechicera'],['Vampiro','Zombi'],
+  ['Fantasma','Espíritu'],['Robot','Androide'],['Alien','Extraterrestre'],['Superhéroe','Villano'],['Ciudad','Pueblo'],
+  ['País','Continente'],['Montaña','Colina'],['Desierto','Sabana'],['Bosque','Selva'],['Isla','Península'],
+  ['Río','Lago'],['Océano','Mar'],['Nube','Niebla'],['Trueno','Rayo'],['Terremoto','Tsunami'],
+  ['Netflix','YouTube'],['WhatsApp','Telegram'],['Instagram','TikTok'],['Coca Cola','Pepsi'],['Nike','Adidas'],
+  ['PlayStation','Xbox'],['Mario','Sonic'],['Batman','Superman'],['Marvel','DC'],['Notebook','Tablet']
+];
+
+/* ==========================================================================
+   STATE
+   ========================================================================== */
+const state = {
+  playerCount: 6,
+  impostorCount: 1,
+  mode: 'classic',      // 'classic' | 'undercover'
+  category: 'comidas',
+  timerDuration: 90,
+  soundEnabled: true,
+  currentPlayer: 0,
+  words: [],            // per-player reveal data
+  revealed: false,
+  timerInterval: null,
+  timerRemaining: 90,
+  timerPaused: false
+};
+
+/* ==========================================================================
+   UTIL
+   ========================================================================== */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function vibrate(pattern){ if(navigator.vibrate){ try{ navigator.vibrate(pattern); }catch(e){} } }
+function pad2(n){ return n<10 ? '0'+n : ''+n; }
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+/* Web Audio beep — fully offline, no external assets */
+let audioCtx = null;
+function beep(times){
+  if(!state.soundEnabled) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    let t = audioCtx.currentTime;
+    for(let i=0;i<times;i++){
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.28, t+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t+0.28);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t+0.3);
+      t += 0.35;
+    }
+  }catch(e){}
+}
+
+/* ==========================================================================
+   SETUP SCREEN LOGIC
+   ========================================================================== */
+function renderCategoryGrid(){
+  const grid = document.getElementById('category-grid');
+  grid.innerHTML = '';
+  CATEGORY_ORDER.forEach(key=>{
+    const cat = CATEGORIES[key];
+    const chip = document.createElement('div');
+    chip.className = 'cat-chip' + (state.category===key ? ' selected' : '');
+    chip.dataset.cat = key;
+    chip.innerHTML = '<span class="ci">'+cat.icon+'</span><span class="ct">'+cat.label+'</span>';
+    grid.appendChild(chip);
+  });
+  const randomChip = document.createElement('div');
+  randomChip.className = 'cat-chip' + (state.category==='random' ? ' selected' : '');
+  randomChip.dataset.cat = 'random';
+  randomChip.innerHTML = '<span class="ci">🎲</span><span class="ct">Random</span>';
+  grid.appendChild(randomChip);
+}
+
+function renderTimerChips(){
+  const row = document.getElementById('timer-chip-row');
+  row.innerHTML = '';
+  [30,60,90,120,180].forEach(sec=>{
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (state.timerDuration===sec ? ' selected' : '');
+    chip.dataset.sec = sec;
+    chip.textContent = sec<60 ? sec+'s' : Math.round(sec/60)+' min';
+    row.appendChild(chip);
+  });
+}
+
+function updateSetupUI(){
+  document.getElementById('players-value').textContent = state.playerCount;
+  document.getElementById('impostors-value').textContent = state.impostorCount;
+  document.querySelectorAll('.mode-card').forEach(el=>{
+    el.classList.toggle('selected', el.dataset.mode === state.mode);
+  });
+  const isUndercover = state.mode === 'undercover';
+  document.getElementById('category-section').classList.toggle('hidden', isUndercover);
+  document.getElementById('undercover-note-wrap').classList.toggle('hidden', !isUndercover);
+  document.getElementById('infiltrator-title').textContent = isUndercover ? 'Cantidad de infiltrados' : 'Cantidad de impostores';
+  document.getElementById('sound-switch').classList.toggle('on', state.soundEnabled);
+
+  const maxImpostors = Math.min(5, state.playerCount - 2);
+  if(state.impostorCount > maxImpostors) state.impostorCount = Math.max(1, maxImpostors);
+  document.getElementById('impostors-value').textContent = state.impostorCount;
+}
+
+document.addEventListener('click', function(e){
+  const action = e.target.closest('[data-action]');
+  if(action){
+    const a = action.dataset.action;
+    if(a==='players-dec'){ state.playerCount = Math.max(3, state.playerCount-1); updateSetupUI(); }
+    if(a==='players-inc'){ state.playerCount = Math.min(20, state.playerCount+1); updateSetupUI(); }
+    if(a==='impostors-dec'){ state.impostorCount = Math.max(1, state.impostorCount-1); updateSetupUI(); }
+    if(a==='impostors-inc'){
+      const maxImpostors = Math.min(5, state.playerCount-2);
+      state.impostorCount = Math.min(maxImpostors, state.impostorCount+1);
+      updateSetupUI();
+    }
+    return;
+  }
+
+  const modeCard = e.target.closest('.mode-card');
+  if(modeCard){ state.mode = modeCard.dataset.mode; updateSetupUI(); return; }
+
+  const catChip = e.target.closest('.cat-chip');
+  if(catChip){
+    state.category = catChip.dataset.cat;
+    document.querySelectorAll('.cat-chip').forEach(c=>c.classList.toggle('selected', c===catChip));
+    return;
+  }
+
+  const timeChip = e.target.closest('#timer-chip-row .chip');
+  if(timeChip){
+    state.timerDuration = parseInt(timeChip.dataset.sec, 10);
+    document.querySelectorAll('#timer-chip-row .chip').forEach(c=>c.classList.toggle('selected', c===timeChip));
+    return;
+  }
+
+  if(e.target.id === 'sound-switch'){
+    state.soundEnabled = !state.soundEnabled;
+    updateSetupUI();
+    return;
+  }
+
+  if(e.target.id === 'btn-start'){ startGame(); return; }
+  if(e.target.id === 'btn-reveal-toggle'){ toggleReveal(); return; }
+  if(e.target.id === 'btn-next-player'){ goToNextPlayer(); return; }
+  if(e.target.id === 'btn-start-discussion'){ startDiscussion(); return; }
+  if(e.target.id === 'btn-timer-pause'){ toggleTimerPause(); return; }
+  if(e.target.id === 'btn-timer-end'){ endTimer(true); return; }
+  if(e.target.id === 'btn-restart'){ restartGame(); return; }
+  if(e.target.id === 'btn-newgame'){ newGame(); return; }
+});
+
+/* ==========================================================================
+   GAME LOGIC — ROLE / WORD ASSIGNMENT
+   ========================================================================== */
+function randomCategoryWords(){
+  const key = pick(CATEGORY_ORDER);
+  return CATEGORIES[key].words;
+}
+
+function startGame(){
+  const n = state.playerCount;
+  const infCount = Math.min(state.impostorCount, n-1);
+
+  if(state.mode === 'classic'){
+    const wordPool = state.category==='random' ? randomCategoryWords() : CATEGORIES[state.category].words;
+    const mainWord = pick(wordPool);
+    const roles = new Array(n).fill('crew');
+    shuffle([...Array(n).keys()]).slice(0, infCount).forEach(i=>roles[i]='impostor');
+    state.words = roles.map(r => r==='impostor'
+      ? { roleClass:'impostor', tag:'IMPOSTOR', word:'🕵️ IMPOSTOR', sub:'No conocés la palabra secreta. Disimulá.' , isCrew:false}
+      : { roleClass:'crew', tag:'PALABRA SECRETA', word:mainWord, sub:'Memorizala y no la digas en voz alta.', isCrew:true }
+    );
+  } else {
+    const pair = pick(UNDERCOVER_PAIRS);
+    const roles = new Array(n).fill('A');
+    shuffle([...Array(n).keys()]).slice(0, infCount).forEach(i=>roles[i]='B');
+    state.words = roles.map(r => r==='A'
+      ? { roleClass:'underA', tag:'PALABRA', word:pair[0], sub:'Describila sin decirla literalmente.', isCrew:true }
+      : { roleClass:'underB', tag:'PALABRA', word:pair[1], sub:'Tu palabra es parecida pero distinta. Disimulá.', isCrew:false }
+    );
+  }
+
+  state.currentPlayer = 0;
+  state.revealed = false;
+  showScreen('reveal');
+  renderReveal();
+}
+
+/* ==========================================================================
+   REVEAL FLOW
+   ========================================================================== */
+function renderProgressDots(){
+  const row = document.getElementById('progress-row');
+  row.innerHTML = '';
+  for(let i=0;i<state.playerCount;i++){
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i<state.currentPlayer ? ' done' : '') + (i===state.currentPlayer ? ' current' : '');
+    row.appendChild(dot);
+  }
+}
+
+function renderReveal(){
+  renderProgressDots();
+  document.getElementById('player-turn-name').textContent = 'Jugador ' + (state.currentPlayer+1);
+  const card = document.getElementById('reveal-card');
+  card.classList.remove('flipped');
+  state.revealed = false;
+  document.getElementById('btn-reveal-toggle').textContent = 'Ver mi palabra';
+
+  const data = state.words[state.currentPlayer];
+  const back = document.getElementById('reveal-back');
+  back.classList.toggle('is-crew', data.isCrew);
+  const tag = document.getElementById('role-tag');
+  tag.textContent = data.tag;
+  tag.className = 'role-tag ' + data.roleClass;
+  const wordEl = document.getElementById('reveal-word');
+  wordEl.textContent = data.word;
+  wordEl.classList.toggle('is-impostor', !data.isCrew && state.mode==='classic');
+  document.getElementById('reveal-sub').textContent = data.sub;
+}
+
+function toggleReveal(){
+  const card = document.getElementById('reveal-card');
+  state.revealed = !state.revealed;
+  card.classList.toggle('flipped', state.revealed);
+  document.getElementById('btn-reveal-toggle').textContent = state.revealed ? 'Ocultar' : 'Ver mi palabra';
+  vibrate(state.revealed ? 30 : 15);
+
+  if(!state.revealed){
+    setTimeout(()=>{
+      if(state.currentPlayer >= state.playerCount-1){
+        showScreen('alldone');
+      } else {
+        document.getElementById('blackout-text').textContent = 'Pasále el teléfono a Jugador ' + (state.currentPlayer+2);
+        showScreen('blackout');
+      }
+    }, 260);
+  }
+}
+
+function goToNextPlayer(){
+  state.currentPlayer++;
+  showScreen('reveal');
+  renderReveal();
+}
+
+/* ==========================================================================
+   DISCUSSION TIMER
+   ========================================================================== */
+const RING_CIRC = 2 * Math.PI * 52;
+
+function startDiscussion(){
+  state.timerRemaining = state.timerDuration;
+  state.timerPaused = false;
+  showScreen('timer');
+  const ring = document.getElementById('ring-fg');
+  ring.style.strokeDasharray = RING_CIRC;
+  document.getElementById('timer-ring-wrap').classList.remove('pulse');
+  document.getElementById('btn-timer-pause').textContent = 'Pausar';
+  renderTimer();
+  clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(tickTimer, 1000);
+}
+
+function renderTimer(){
+  const m = Math.floor(state.timerRemaining/60);
+  const s = state.timerRemaining%60;
+  document.getElementById('timer-time').textContent = pad2(m)+':'+pad2(s);
+  const ratio = state.timerRemaining / state.timerDuration;
+  const ring = document.getElementById('ring-fg');
+  ring.style.strokeDashoffset = RING_CIRC * (1-ratio);
+  document.getElementById('timer-ring-wrap').classList.toggle('pulse', state.timerRemaining<=10);
+}
+
+function tickTimer(){
+  if(state.timerPaused) return;
+  state.timerRemaining--;
+  renderTimer();
+  if(state.timerRemaining<=0){
+    clearInterval(state.timerInterval);
+    beep(3);
+    vibrate([200,100,200,100,400]);
+    endTimer(false);
+  }
+}
+
+function toggleTimerPause(){
+  state.timerPaused = !state.timerPaused;
+  document.getElementById('btn-timer-pause').textContent = state.timerPaused ? 'Reanudar' : 'Pausar';
+}
+
+function endTimer(manual){
+  clearInterval(state.timerInterval);
+  showScreen('end');
+}
+
+/* ==========================================================================
+   RESTART / NEW GAME
+   ========================================================================== */
+function restartGame(){
+  startGame();
+}
+function newGame(){
+  showScreen('setup');
+}
+
+/* ==========================================================================
+   INIT
+   ========================================================================== */
+renderCategoryGrid();
+renderTimerChips();
+updateSetupUI();
+</script>
+</body>
+</html>
